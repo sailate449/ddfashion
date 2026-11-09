@@ -1,0 +1,61 @@
+{
+  "routes": [
+    {
+      "routePath": "/api/chat-data",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/chat-data.js:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/imagekit-auth",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/imagekit-auth.js:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/imagekit-upload",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/imagekit-upload.js:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/send-otp",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/send-otp.js:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/store-data",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/store-data.js:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/user-session",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/user-session.js:onRequest"
+      ]
+    },
+    {
+      "routePath": "/api/verify-otp",
+      "mountPath": "/api",
+      "method": "",
+      "module": [
+        "api/verify-otp.js:onRequest"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}
