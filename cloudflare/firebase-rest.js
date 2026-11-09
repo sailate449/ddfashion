@@ -264,7 +264,8 @@ export async function commitFirestoreWrites(env, writes, transaction) {
 export function firestoreUpdateWrite(collection, documentId, fields, options = {}) {
   const projectId = options.projectId || '';
   const cleanCol = String(collection).split('/').map(encodeURIComponent).join('/');
-  const name = `${FIRESTORE_ROOT}/${encodeURIComponent(projectId)}/databases/(default)/documents/${cleanCol}/${encodeURIComponent(documentId)}`;
+  // CHANGE THIS LINE: remove https://firestore.googleapis.com/v1/
+  const name = `projects/${encodeURIComponent(projectId)}/databases/(default)/documents/${cleanCol}/${encodeURIComponent(documentId)}`;
   const write = { update: { name, fields: encodeFirestoreFields(fields) } };
   if (options.fieldPaths?.length) write.updateMask = { fieldPaths: options.fieldPaths };
   if (options.exists !== undefined) write.currentDocument = { exists: options.exists };
@@ -313,7 +314,8 @@ export async function runFirestoreTransaction(env, documentRefs, worker) {
 
 export function firestoreDeleteWrite(collection, documentId, projectId) {
   const cleanCol = String(collection).split('/').map(encodeURIComponent).join('/');
-  return { delete: `${FIRESTORE_ROOT}/${encodeURIComponent(projectId)}/databases/(default)/documents/${cleanCol}/${encodeURIComponent(documentId)}` };
+  // CHANGE THIS LINE: remove https://firestore.googleapis.com/v1/
+  return { delete: `projects/${encodeURIComponent(projectId)}/databases/(default)/documents/${cleanCol}/${encodeURIComponent(documentId)}` };
 }
 
 export async function firebaseAdminRequest(env, method, payload) {
