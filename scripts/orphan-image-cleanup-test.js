@@ -1,0 +1,14 @@
+const fs = require('fs');
+const assert = require('assert');
+const backend = fs.readFileSync('netlify/functions/store-data.js', 'utf8');
+const html = fs.readFileSync('index.html', 'utf8');
+assert(backend.includes("action === 'admin_imagekit_orphan_preview'"));
+assert(backend.includes("action === 'admin_imagekit_orphan_delete'"));
+assert(backend.includes("'/production/products/'"));
+assert(backend.includes('referencedIds.has(String(f.fileId))'));
+assert(backend.includes('referencedUrls.has(String(f.url).split(\'?\')[0])'));
+assert(backend.includes('7 * 24 * 60 * 60 * 1000'), 'Must enforce 7-day grace period');
+assert(backend.includes('requested.includes(String(f.fileId))'), 'Delete must be limited to explicitly confirmed IDs');
+assert(html.includes('window.adminPreviewOrphanImages()'));
+assert(html.includes("action: 'admin_imagekit_orphan_delete'"));
+console.log('Orphan Image Cleanup tests passed (reference scan, 7-day grace period, explicit confirmation, single backend and UI wiring).');

@@ -1,0 +1,16 @@
+{
+  "name": "dd-fashion-boutique",
+  "version": "1.0.0",
+  "description": "DD Fashion Exclusive Boutique - Secure Firebase Email OTP Registration & Auth Backend with EmailJS on Netlify Functions",
+  "private": true,
+  "scripts": {
+    "test": "node scripts/smoke-test.js && node scripts/checkout-safety-test.js && node scripts/financial-safety-test.js && node scripts/coming-soon-order-safety-test.js && node scripts/product-lifecycle-hardening-test.js && node scripts/product-admin-tools-test.js && node scripts/orphan-image-cleanup-test.js && node scripts/product-maintenance-counts-test.js && node scripts/stale-product-cache-safety-test.js && node scripts/reward-coupon-safety-test.js && node scripts/admin-only-defaults-test.js && node scripts/cashback-reporting-test.js && node scripts/cashback-reconciliation-test.js && node scripts/backend-security-audit-test.js && node scripts/chat-otp-security-hardening-test.js && node scripts/review-points-safety-test.js && node scripts/reward-program-toggle-safety-test.js && node scripts/audit-center-safety-test.js && node scripts/cloudflare-user-session-stage2-test.js && node scripts/cloudflare-otp-stage3-test.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "node-fetch": "^2.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

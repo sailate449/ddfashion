@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin_master', 'admin_staff'];
+    }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+
+    match /otp_challenges/{emailHash} { allow read, write: if false; }
+    match /otp_rate_limits/{limitKey} { allow read, write: if false; }
+    match /image_upload_rate_limits/{limitKey} { allow read, write: if false; }
+    // Server-only immutable email <-> Firebase UID uniqueness index.
+    match /email_uid_map/{emailHash} { allow read, write: if false; }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if false;
+      allow update: if isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'role', 'email', 'emailVerified', 'pointsBalance', 'pointsDebt', 'totalPointsEarned', 'pointsTotalUsed', 'pointsHistory',
+        'purchaseTotalSpent', 'purchaseOrderCount', 'cashbackBalance', 'cashbackDebt', 'cashbackTotalEarned', 'cashbackTotalUsed', 'cashbackHistory',
+        'purchaseRewardTierIds', 'purchaseRewardHistory',
+        'monthlyPurchaseMonthKey', 'monthlyPurchaseTotalSpent', 'monthlyPurchaseRewardTierKeys'
+      ]);
+      allow delete: if false;
+    }
+
+    match /deleted_products/{productId} { allow read, write: if false; }
+    match /product_delete_audit/{auditId} { allow read: if isAdmin(); allow write: if false; }
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    // Product cost prices are private; only the trusted Admin SDK function can access them.
+    match /product_costs/{productId} { allow read, write: if false; }
+
+    match /reviews/{reviewId} {
+      allow read: if resource.data.hidden != true || (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow create, update, delete: if false;
+    }
+    match /review_reward_claims/{claimId} { allow read, write: if false; }
+
+    match /points_ledger/{entryId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+    match /redeemed_coupons/{couponCode} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+    match /points_audit_logs/{logId} { allow read: if isAdmin(); allow write: if false; }
+    match /financial_audit_logs/{logId} { allow read: if isAdmin(); allow write: if false; }
+    match /promo_coupon_usage/{usageId} { allow read, write: if false; }
+    match /promo_coupon_counters/{counterId} { allow read: if isAdmin(); allow write: if false; }
+    match /purchase_reward_ledger/{entryId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+    match /cashback_ledger/{entryId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+    match /purchase_order_rewards/{markerId} { allow read, write: if isAdmin(); }
+
+    match /orders/{orderId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+    match /promos/{promoId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    match /customer_chats/{userId} { allow read, write: if false; } // All chat access is mediated by authenticated Netlify functions.
+    match /store_config/{docId} {
+      allow read: if isAdmin() || docId in ['settings', 'reward_settings', 'stocklogs'];
+      allow write: if isAdmin();
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

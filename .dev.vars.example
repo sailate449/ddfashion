@@ -1,0 +1,21 @@
+# Example names only. Never put real secrets in this file or commit .dev.vars.
+# Configure real values in Cloudflare Dashboard > Workers & Pages > DD Fashion
+# > Settings > Variables and Secrets. Use Secrets for all private keys.
+
+FIREBASE_PROJECT_ID=
+FIREBASE_WEB_API_KEY=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
+
+IMAGEKIT_PUBLIC_KEY=
+IMAGEKIT_PRIVATE_KEY=
+IMAGEKIT_URL_ENDPOINT=
+
+EMAILJS_SERVICE_ID=
+EMAILJS_TEMPLATE_ID=
+EMAILJS_PUBLIC_KEY=
+EMAILJS_PRIVATE_KEY=
+
+ADMIN_MASTER_EMAIL=
+ADMIN_STAFF_EMAIL=
+SITE_URL=

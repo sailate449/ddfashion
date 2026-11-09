@@ -1,0 +1,15 @@
+const fs = require('fs');
+const path = require('path');
+const assert = require('assert');
+const root = path.resolve(__dirname, '..');
+const backend = fs.readFileSync(path.join(root, 'netlify/functions/store-data.js'), 'utf8');
+const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
+assert(backend.includes("collection('deleted_products')"), 'Deleted product registry must be used');
+assert(backend.includes('deleteRetryRequired: true'), 'Failed external cleanup must leave retry marker');
+assert(backend.includes('product.deleting === true || product.deleted === true'), 'Checkout must reject products being deleted');
+assert(backend.includes('deletedSnap.exists || existingSnap.exists || p.deleting === true || p.deleted === true'), 'Legacy local sync must not overwrite or resurrect products');
+assert(backend.includes("batch.create(db.collection('products').doc(docId)"), 'Legacy sync must be create-only');
+assert(backend.includes('tombstone.exists) throw'), 'Admin save must not silently reuse deleted product IDs');
+assert(rules.includes('match /deleted_products/{productId} { allow read, write: if false; }'), 'Deleted registry must be server-only');
+assert(rules.includes('match /product_delete_audit/{auditId} { allow read: if isAdmin(); allow write: if false; }'), 'Delete audit must be admin-readable and server-written');
+console.log('Product lifecycle hardening tests passed.');

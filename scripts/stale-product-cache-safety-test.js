@@ -1,0 +1,13 @@
+const fs = require('fs');
+const path = require('path');
+const assert = require('assert');
+const root = path.resolve(__dirname, '..');
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const backend = fs.readFileSync(path.join(root, 'netlify/functions/store-data.js'), 'utf8');
+assert(html.includes('// Firestore is authoritative: never keep stale cached products/images'), 'Empty live snapshot must clear stale customer product cache');
+assert(html.includes('products = [];') && html.includes("safeStorageSet('dd_demo_products', '[]')"), 'Empty Firestore snapshot must clear product cache');
+assert(html.includes('const liveProductIds = new Set(remoteProducts.filter(p => p.deleting !== true && p.deleted !== true)'), 'Cart must be reconciled against authoritative live product IDs');
+assert(html.includes('cart = (Array.isArray(cart) ? cart : []).filter(item => liveProductIds.has(String(item.id)))'), 'Stale cart products must be removed after snapshot');
+assert(backend.includes('if (!snap.exists) throw new Error(`ပစ္စည်း မတွေ့ပါ:'), 'Server checkout must reject missing Firestore products');
+assert(backend.includes('product.deleting === true || product.deleted === true'), 'Server checkout must reject deleted/deleting products');
+console.log('Stale product cache and checkout safety tests passed.');

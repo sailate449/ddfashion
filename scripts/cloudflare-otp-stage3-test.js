@@ -1,0 +1,27 @@
+const fs = require('fs');
+const path = require('path');
+const root = path.resolve(__dirname, '..');
+const read = p => fs.readFileSync(path.join(root, p), 'utf8');
+const shared = read('cloudflare/firebase-rest.js');
+const otp = read('functions/api/_otp.js');
+const send = read('functions/api/send-otp.js');
+const verify = read('functions/api/verify-otp.js');
+const html = read('index.html');
+function assert(ok, message) { if (!ok) throw new Error(message); }
+assert(send.includes('export async function onRequest'), 'Cloudflare send-otp route missing.');
+assert(verify.includes('export async function onRequest'), 'Cloudflare verify-otp route missing.');
+assert(send.includes('OTP_EXPIRY_MS') && otp.includes('15 * 60 * 1000'), '15-minute OTP expiry must be retained.');
+assert(otp.includes('RESEND_COOLDOWN_MS = 60 * 1000'), '60-second resend cooldown must be retained.');
+assert(otp.includes('MAX_OTP_ATTEMPTS = 5'), 'Five-attempt limit must be retained.');
+assert(send.includes('MAX_EMAIL_OTP_PER_HOUR') && send.includes('MAX_IP_OTP_PER_HOUR'), 'Email/IP hourly limits must be retained.');
+assert(send.includes('api.emailjs.com/api/v1.0/email/send'), 'EmailJS delivery endpoint missing.');
+assert(send.includes('otp_code: otpCode') && send.includes("expiry_minutes: '15'"), 'OTP EmailJS template parameters missing.');
+assert(verify.includes('createFirebaseCustomToken') && verify.includes('customToken'), 'Firebase custom-token return flow missing.');
+assert(verify.includes('createFirebaseUser') && verify.includes('deleteFirebaseUser'), 'Registration create/rollback flow missing.');
+assert(verify.includes('updateFirebaseUser'), 'Password reset/Admin Auth update flow missing.');
+assert(shared.includes('runFirestoreTransaction') && shared.includes(':beginTransaction'), 'Firestore transaction support missing.');
+assert(shared.includes('identitytoolkit'), 'Firebase Auth Admin OAuth scope missing.');
+assert(shared.includes('FIREBASE_WEB_API_KEY'), 'Firebase Web API key configuration guard missing.');
+assert(!send.includes("require('crypto')") && !verify.includes("require('firebase-admin')"), 'Cloudflare OTP routes must not use Node-only Firebase Admin SDK.');
+assert(html.includes("'/api/send-otp'") && html.includes("'/api/verify-otp'"), 'Frontend must remain on Netlify until Preview validation is complete.');
+console.log('Cloudflare OTP Stage 3 structural safety checks passed.');

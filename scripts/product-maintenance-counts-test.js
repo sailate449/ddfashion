@@ -1,0 +1,14 @@
+const fs = require('fs');
+const assert = require('assert');
+const backend = fs.readFileSync('netlify/functions/store-data.js', 'utf8');
+const html = fs.readFileSync('index.html', 'utf8');
+assert(backend.includes("action === 'admin_product_maintenance_counts'"));
+assert(backend.includes("where('deleteRetryRequired', '==', true).limit(501)"));
+assert(backend.includes('unusedImageCount: candidates.length'));
+assert(backend.includes("Date.parse(f.createdAt || '')"), 'ImageKit ISO timestamps must be parsed correctly');
+assert(html.includes('id="retryDeleteCount"'));
+assert(html.includes('id="unusedImageCount"'));
+assert(html.includes("action: 'admin_product_maintenance_counts'"));
+assert(html.includes("tab === 'products' && typeof window.refreshProductMaintenanceCounts"));
+assert(html.includes('await window.refreshProductMaintenanceCounts()'));
+console.log('Product maintenance count tests passed (backend count endpoint, ISO timestamps, badge UI refresh).');

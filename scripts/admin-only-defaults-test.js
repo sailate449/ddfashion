@@ -1,0 +1,36 @@
+'use strict';
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const root = path.resolve(__dirname, '..');
+const client = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+for (const rel of ['functions/api/store-data.js', 'netlify/functions/store-data.js']) {
+  const server = fs.readFileSync(path.join(root, rel), 'utf8');
+  assert.match(server, /points4Star:\s*0/);
+  assert.match(server, /points5Star:\s*0/);
+  assert.match(server, /photoBonusPoints:\s*0/);
+  assert.match(server, /purchaseTiers:\s*\[\]/);
+  assert.match(server, /monthlyPurchaseTiers:\s*\[\]/);
+  assert.match(server, /tiers:\s*\[\]/);
+  assert.match(server, /function getRewardSettings\(raw = \{\}\)/);
+  assert.match(server, /LEGACY_AUTO_PURCHASE_TIER_IDS/);
+  assert.match(server, /Number\(source\.adminConfigVersion \|\| 0\) < 2/);
+  assert.match(server, /adminConfigVersion: 2/);
+  assert.match(server, /Number\(rewardCfg\.points5Star \?\? 0\)/);
+  assert.match(server, /Number\(rewardCfg\.points4Star \?\? 0\)/);
+  assert.match(server, /Array\.isArray\(settings\.purchaseTiers\) \? settings\.purchaseTiers : \[\]/);
+  assert.match(server, /LEGACY_AUTO_PURCHASE_TIER_IDS = new Set\(\['spend_200k', 'spend_500k', 'spend_1m'\]\)/);
+}
+assert.match(client, /let products = \[\];/);
+assert.match(client, /let promoBanners = \[\];/);
+assert.match(client, /window\.getDefaultPromotions = \(\) => \[\]/);
+assert.match(client, /legacyAutoTierIds/);
+assert.match(client, /incomingRewardSettings\.adminConfigVersion \|\| 0\) < 2/);
+assert.match(client, /if \(snap\.empty\) \{\s*\/\/ Firestore is authoritative: an empty collection means no promotions\./);
+assert.match(client, /points4Star:\s*0/);
+assert.match(client, /points5Star:\s*0/);
+assert.match(client, /photoBonusPoints:\s*0/);
+assert.match(client, /purchaseTiers:\s*\[\]/);
+assert.match(client, /id="couponTotalUsageLimitInput" min="0" step="1" value="0"/);
+assert.doesNotMatch(client, /let products = \[\s*\{/);
+console.log('Admin-only defaults tests passed (no implicit products, promotions, review points, or purchase reward tiers).');
